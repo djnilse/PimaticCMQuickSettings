@@ -9,7 +9,6 @@ import android.support.v7.widget.*;
 import android.view.*;
 import android.widget.*;
 import com.android.volley.*;
-import com.android.volley.toolbox.*;
 import cyanogenmod.app.*;
 import org.json.*;
 
@@ -56,13 +55,17 @@ public class PimaticActivity extends AppCompatActivity
     public void addQuickSetting(final View view) {
         // Instantiate the RequestQueue.
         SingletonRequestQueue queue = SingletonRequestQueue.getInstance(view.getContext());
-		//RequestQueue queue = Volley.newRequestQueue(this);
-        String url = "http://192.168.1.10/api/variables/temp.temperature";
+		
+        String serverIP = "djnilse.ddns.net";
+		String variablesUrl = "http://" + serverIP + "/api/variables/";
+		String deviceVariable = "temp.temperature";
 		String user = "app";
 		String password = "ohhwhatstronkpassworT";
 
+		String url = variablesUrl + deviceVariable;
+		
         // Request a json response from the provided URL.
-        AuthJsonObjectRequest authJsonObjectRequest = new AuthJsonObjectRequest(Request.Method.GET, url, user, password,
+        AuthJsonObjectRequest authJsonObjectRequest = new AuthJsonObjectRequest(Request.Method.GET, url + deviceVariable, user, password,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
