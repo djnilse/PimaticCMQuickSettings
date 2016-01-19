@@ -1,28 +1,69 @@
 package de.nstrelow.pimaticquicksettings;
 
-import android.os.*;
-import android.support.design.widget.*;
-import android.support.v4.view.*;
-import android.support.v4.widget.*;
-import android.support.v7.app.*;
-import android.support.v7.widget.*;
-import android.view.*;
-import android.widget.*;
-import com.android.volley.*;
-import cyanogenmod.app.*;
-import org.json.*;
-
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.annotation.IdRes;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
+import java.net.URL;
+
+import cyanogenmod.app.CMStatusBarManager;
+import cyanogenmod.app.CustomTile;
+
+import de.nstrelow.pimaticquicksettings.api.Device;
 
 public class PimaticActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private int TEMP_TILE_ID = 25432;
+    public static final int TEMP_TILE_ID = 25432;
+    public static final int DEVICE_TILE_ID = 8451752;
     private TextView mTextView;
 
     private static final String TAG_VARIABLE = "variable";
     private static final String TAG_VALUE = "value";
-	private static final String TAG_UNIT="unit";
+    private static final String TAG_UNIT = "unit";
+
+
+    public static String serverIP = "192.168.1.10";
+    public static String variables = "/api/variables/";
+    public static String device = "/api/device/";
+    public static String variablesUrl = "http://" + serverIP + variables;
+    public static String deviceUrl = "http://" + serverIP + device;
+    public static String deviceVariable = "temp.temperature";
+    public static String user = "app";
+    public static String password = "ohhwhatstronkpassworT";
+    public static String userLocal = "nilse";
+    public static String passwordLocal = "sh@k1ra";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,20 +93,106 @@ public class PimaticActivity extends AppCompatActivity
         mTextView = (TextView) findViewById(R.id.textView);
     }
 
-    public void addQuickSetting(final View view) {
-        // Instantiate the RequestQueue.
-        SingletonRequestQueue queue = SingletonRequestQueue.getInstance(view.getContext());
-		
-        String serverIP = "djnilse.ddns.net";
-		String variablesUrl = "http://" + serverIP + "/api/variables/";
-		String deviceVariable = "temp.temperature";
-		String user = "app";
-		String password = "ohhwhatstronkpassworT";
+    private String getTextById(@IdRes int id) {
+        return ((EditText) findViewById(id)).getText().toString();
+    }
 
-		String url = variablesUrl + deviceVariable;
-		
+    public void getPimaticConfig() {
+        if(!getTextById(R.id.editTextServerIP).isEmpty())
+            serverIP = getTextById(R.id.editTextServerIP);
+        if(!getTextById(R.id.editTextUser).isEmpty())
+            user = getTextById(R.id.editTextUser);
+        if(!getTextById(R.id.editTextPassword).isEmpty())
+            password = getTextById(R.id.editTextPassword);
+        deviceVariable = getTextById(R.id.editTextDevice);
+
+        variablesUrl = "http://" + serverIP + variables;
+        deviceUrl = "http://" + serverIP + device;
+    }
+
+    public static final String DEVICE_STATE = "device_state";
+    public static final String DEVICE_NAME = "device_name";
+    public static final String DEVICE_URL = "device_url";
+
+
+    public void addActionTile(final View view) throws IOException {
+
+        SingletonRequestQueue queue = SingletonRequestQueue.getInstance(view.getContext());
+
+        getPimaticConfig();
+
+        String url = deviceUrl + deviceVariable;
+
+        Intent intent = new Intent();
+        intent.setAction(Device.ACTION_TOGGLE_DEVICE);
+        intent.putExtra(PimaticActivity.DEVICE_STATE, Device.STATE_OFF);
+        intent.putExtra(PimaticActivity.DEVICE_NAME, deviceVariable);
+        intent.putExtra(PimaticActivity.DEVICE_URL, url);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Instantiate a builder object
+        CustomTile deviceTile = new CustomTile.Builder(this)
+                .setOnClickIntent(pendingIntent)
+                .setContentDescription("Pimatic Device Tile")
+                .setLabel(deviceVariable + " is " + Device.OFF)
+                .shouldCollapsePanel(false)
+                .setIcon(R.drawable.ic_menu_camera)
+                .build();
+
+
+        CMStatusBarManager.getInstance(this)
+                .publishTile(DEVICE_TILE_ID, deviceTile);
+
+    }
+
+    private void httpPost(URL url) throws IOException {
+
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        try
+
+        {
+            urlConnection.setDoOutput(true);
+            urlConnection.setChunkedStreamingMode(0);
+
+            OutputStream out = new BufferedOutputStream(urlConnection.getOutputStream());
+            OutputStreamWriter wout = new OutputStreamWriter(out);
+            writeAction(wout);
+
+            InputStream in = new BufferedInputStream(urlConnection.getInputStream());
+            //readStream(in);
+        } finally
+
+        {
+            urlConnection.disconnect();
+        }
+    }
+
+    void writeAction(OutputStreamWriter writer) {
+        try {
+            writer.write("");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void addInfoTile(final View view) {
+
+        SingletonRequestQueue queue = SingletonRequestQueue.getInstance(view.getContext());
+
+        getPimaticConfig();
+
+        String url = variablesUrl + deviceVariable;
+
+        Authenticator.setDefault(new Authenticator() {
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(user, password.toCharArray());
+            }
+        });
+
         // Request a json response from the provided URL.
-        AuthJsonObjectRequest authJsonObjectRequest = new AuthJsonObjectRequest(Request.Method.GET, url + deviceVariable, user, password,
+        JsonObjectRequest authJsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
@@ -95,7 +222,6 @@ public class PimaticActivity extends AppCompatActivity
         });
         // Add the request to the RequestQueue.
         queue.addToRequestQueue(authJsonObjectRequest);
-
 
     }
 

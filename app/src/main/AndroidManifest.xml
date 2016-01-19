@@ -21,6 +21,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <receiver android:name=".DeviceTileReceiver">
+            <intent-filter>
+                <action android:name="de.nstrelow.pimaticquicksettings.ACTION_TOGGLE_DEVICE"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

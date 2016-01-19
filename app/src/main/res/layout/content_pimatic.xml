@@ -12,24 +12,63 @@
     tools:context="de.nstrelow.pimaticquicksettings.PimaticActivity"
     tools:showIn="@layout/app_bar_pimatic">
 
-    <TextView
+    <android.support.v7.widget.AppCompatTextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:text="Welcome to Pimatic Quicksettings"
-        android:textSize="20sp"/>
-	
-	<TextEdit
-		android:id="@+id/txtEdit"
-		/>
+        android:textSize="20sp" />
 
-    <Button
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/editTextServerIP"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textView"
+        android:hint="Pimatic server IP" />
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/editTextUser"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editTextServerIP"
+        android:hint="Pimatic username" />
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/editTextPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editTextUser"
+        android:hint="Pimatic password" />
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/editTextDevice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editTextPassword"
+        android:hint="Pimatic device" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/buttonAction"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:onClick="addQuickSetting"
-        android:text="Add Quicksetting"
+        android:onClick="addActionTile"
+        android:text="Add Action Tile"
+        android:textSize="24sp" />
+
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/buttonInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/buttonAction"
+        android:onClick="addInfoTile"
+        android:text="Add Info Tile"
         android:textSize="24sp" />
 </RelativeLayout>
